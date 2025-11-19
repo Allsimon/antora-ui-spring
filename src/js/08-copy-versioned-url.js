@@ -16,15 +16,31 @@
 ;(function () {
   'use strict'
 
-  var copyUrl = document.getElementById('copy-url')
-  if (!copyUrl) return
+  activateCopyUrl(document.getElementById('copy-url'))
 
-  copyUrl.addEventListener('click', function (event) {
-    var versionedUrl = document.querySelector('meta[name="versioned-url"]')?.content
-    window.navigator.clipboard.writeText(versionedUrl)
-    this.classList.add('copied')
-    setTimeout(() => {
-      this.classList.remove('copied')
-    }, 1500)
-  })
+  function activateCopyUrl (copyUrl) {
+    if (!copyUrl) return
+
+    copyUrl.addEventListener('click', function (event) {
+      const hash = _hash(window)
+      const versionedUrl = document.querySelector('meta[name="versioned-url"]')?.content + hash
+      window.navigator.clipboard.writeText(versionedUrl)
+      this.classList.add('copied')
+      setTimeout(() => {
+        this.classList.remove('copied')
+      }, 1500)
+    })
+  }
+
+  function _hash (window) {
+    const hash = window.location.hash
+    return isValidHash(hash) ? hash : ''
+  }
+
+  // ensure malicious user cannot inject code via URL hash
+  function isValidHash (hash) {
+    if (!hash || typeof hash !== 'string') return false
+    const isHashRegex = /^#[-.\w]+$/
+    return isHashRegex.test(hash)
+  }
 })()
